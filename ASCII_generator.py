@@ -1,10 +1,11 @@
 from PIL import Image
 import tkinter as tk
 from tkinter import filedialog
-
-
+import cv2
+import os
+##### mp4 doesnt work dont use it
 selected_file_path = ""  # Global variable to store the selected file path
-
+selected_output_path = ""
 
 
 # ASCII characters arranged by rough density
@@ -18,6 +19,7 @@ ascii_characters_by_density = [
     "E", "U", "T", "l", "y", "u", "a", "^", "@", "j", "g", "b", "y", "h", "U", "K", "4", "T", "N", "P", "R",
     "k", "6", "%", "E", "W", "B", "M", "#"
 ]
+
 #'function to generate the are
 def get_ascii_art(image_path, rows, columns):
     # Load the image
@@ -59,6 +61,45 @@ def get_ascii_art(image_path, rows, columns):
     return ascii_art
 
 
+def get_video_path():
+    global selected_file_path#i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
+    selected_file_path = filedialog.askopenfilename(filetypes=[("Mp4 Files", "*.mp4;")]) 
+
+def get_output_folder():
+    global selected_output_path
+    selected_output_path = filedialog.askdirectory()
+
+def mp4_to_jpeg():
+    global selected_file_path, selected_output_path
+
+    cap = cv2.VideoCapture(selected_file_path)
+
+    frame_count = 0
+
+    while True:
+        ret, frame = cap.read()
+
+        if not ret:
+            break
+
+        jpeg_filename = f"{selected_output_path}/frame_{frame_count:044}.jpg"
+        cv2.imwrite(jpeg_filename, frame)
+
+        frame_count += 1
+    
+    cap.release()
+
+def jpeg_to_string(folder_path):
+    frame_dict = {}
+    with os.scandir(folder_path) as entries:
+      for entry in entries:
+        if entry.is_file():
+            ascii_art = get_ascii_art(image_path = entry)
+            frame_dict[entry.name] = ascii_art
+
+def output_frame_dict():
+    return 0
+
 
 # Function to set the file path
 def get_image_path():
@@ -97,7 +138,7 @@ main_window = tk.Tk()
 main_window.title("Settings for your generation!")
 
 # Set window size and background color
-main_window.geometry("400x400")
+main_window.geometry("400x600")
 main_window.configure(bg="#f0f0f0")
 
 # creates a generate art button
@@ -111,20 +152,30 @@ get_art_button = tk.Button(
 )
 
 
-get_art_button.pack(pady=10)
+get_art_button.pack(pady= 10)
 
 # gets the image path
 get_image_path_button = tk.Button(
     main_window,
-    text="Select image",
-    font=("Rockabilly", 10),
-    command=get_image_path,
-    width=20,  
-    height=2
+    text= "Select image",
+    font= ("Rockabilly", 10),
+    command= get_image_path,
+    width= 20,  
+    height= 2
 )
 
-get_image_path_button.pack(pady=10)
+get_image_path_button.pack(pady= 10)
 
+get_video_path_button = tk.Button(
+    main_window,
+    text= "Select Mp4",
+    font= ("Rockabilly", 10),
+    command= get_video_path,
+    width= 20,
+    height= 2,
+)
+
+get_video_path_button.pack(pady= 20)
 ####GUI variables
 font_size_var = tk.IntVar() ###declares a bunch of int variables and sets a pre value of 1 for all
 font_size_var.set(1)
@@ -137,14 +188,14 @@ columns.set(1)
 
 font_size_scale = tk.Scale(
     main_window,
-    from_=1,
-    to=20,
-    orient=tk.HORIZONTAL,
-    variable=font_size_var,
-    label="Font Size",
+    from_= 1,
+    to= 20,
+    orient= tk.HORIZONTAL,
+    variable= font_size_var,
+    label= "Font Size",
     )
 
-font_size_scale.pack(pady=10)
+font_size_scale.pack(pady = 10)
 
 rows_scale = tk.Scale(
     main_window,
@@ -171,9 +222,6 @@ columns_scale.pack(pady=10)
 
 #starts the main loop of the main GUI window
 main_window.mainloop()
-
-
-
 
 
 
