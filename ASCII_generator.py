@@ -52,10 +52,18 @@ def get_ascii_art(image_path):
                     ascii_art += ascii_characters_by_density[brightness_index]
     #returns completed string
     return ascii_art
-#function for GUI to open the file
-def open_file():
-    file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")])
-    if file_path: #if theres a file path then execute
+
+selected_file_path = ""  # Global variable to store the selected file path
+
+# Function to set the file path
+def get_image_path():
+    global selected_file_path#i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
+    selected_file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.gif")]) #i honestly dont know how this works thank you internet u the real MPV
+
+# Function to open the file and display ASCII art
+def open_file(font_size_var):
+    global selected_file_path #i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
+    if selected_file_path:  # Check if a file path is selected
         # Create a themed Tkinter window for displaying ASCII art
         ascii_window = tk.Tk() #creates the window
         ascii_window.title("ASCII Art") #sets new window title
@@ -65,13 +73,13 @@ def open_file():
         ascii_window.configure(bg="#f0f0f0") #white cos we in testing
         
         # Get ASCII art from the selected image
-        ascii_art = get_ascii_art(file_path)
+        ascii_art = get_ascii_art(selected_file_path)
         
         # Create a label for displaying the ASCII art
         ascii_label = tk.Label(
             ascii_window,
             text=ascii_art,
-            font=("Courier New", 2),  # Adjust font size and font family as needed #make this into a setting so i dont need to keep re running app to modify
+            font=("Courier New", font_size_var),  # Adjust font size and font family as needed #make this into a setting so i dont need to keep re running app to modify
             bg="#f0f0f0",
             justify="left"  # Adjust justification as needed
         )
@@ -84,7 +92,7 @@ main_window = tk.Tk()
 main_window.title("Settings for your generation!")
 
 # Set window size and background color
-main_window.geometry("200x100")
+main_window.geometry("400x400")
 main_window.configure(bg="#f0f0f0")
 
 # Create a button for selecting an image file
@@ -92,11 +100,51 @@ get_art_button = tk.Button(
     main_window,
     text="Generate image",
     font=("Rockabilly", 10),
-    command=open_file,
+    command=lambda: open_file(font_size_var.get()),
     width=20,  
     height=2
 )
+
+
 get_art_button.pack(pady=10)
+
+# gets the image path
+get_image_path_button = tk.Button(
+    main_window,
+    text="Select file path for your image",
+    font=("Rockabilly", 10),
+    command=get_image_path,
+    width=20,  
+    height=2
+)
+
+get_image_path_button.pack(pady=10)
+
+
+#font size slider 
+font_size_var = tk.IntVar()
+font_size_var.set(2)
+font_size_scale = tk.Scale(
+    main_window,
+    from_=1,
+    to=20,
+    orient=tk.HORIZONTAL,
+    variable=font_size_var,
+    label="Font Size",
+    )
+
+font_size_scale.pack(pady=10)
+
 
 #starts the main loop of the main GUI window
 main_window.mainloop()
+
+
+
+
+
+
+
+
+
+
