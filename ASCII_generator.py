@@ -1,6 +1,11 @@
 from PIL import Image
 import tkinter as tk
-from tkinter import filedialog, ttk, font
+from tkinter import filedialog
+
+
+selected_file_path = ""  # Global variable to store the selected file path
+
+
 
 # ASCII characters arranged by rough density
 ascii_characters_by_density = [
@@ -14,7 +19,7 @@ ascii_characters_by_density = [
     "k", "6", "%", "E", "W", "B", "M", "#"
 ]
 #'function to generate the are
-def get_ascii_art(image_path):
+def get_ascii_art(image_path, rows, columns):
     # Load the image
     img = Image.open(image_path)
 
@@ -38,12 +43,12 @@ def get_ascii_art(image_path):
                     brightness = pixels[x, y]
                     min_brightness = min(brightness, min_brightness)#This for loop will get me minimum and max brightness values from the range of data within the pixels
                     max_brightness = max(brightness, max_brightness)# can then utalise this information in the next for loop to dynamically set ASCII characters
-
+    
     for y in range(height):
-        if y % 1 == 0: #if i change this it will exclude the height row % 3 will take every 3rd row ETC
+        if y % rows == 0: #if i change this it will exclude the height row % 3 will take every 3rd row ETC
             ascii_art += "\n" #adds a new line to the string whenever we hit a new Y coordinate char
             for x in range(width):
-                if x % 1 == 0: #if i change this it will exclude the width row % 3 will take every 3rd row ETC
+                if x % columns == 0: #if i change this it will exclude the width row % 3 will take every 3rd row ETC
                     # converted image to greyscale with (img = img.convert("L")) this means we no longer have to work on RGB channels and only work on brightness values
                     brightness = pixels[x, y]
                     # Calculate the brightness index in a dynamic way so every image has different brightness values, this calculates the range and gets us representative values convert to int to get approimation we can only have 155 values as a max
@@ -53,7 +58,7 @@ def get_ascii_art(image_path):
     #returns completed string
     return ascii_art
 
-selected_file_path = ""  # Global variable to store the selected file path
+
 
 # Function to set the file path
 def get_image_path():
@@ -62,7 +67,7 @@ def get_image_path():
 
 # Function to open the file and display ASCII art
 def open_file(font_size_var):
-    global selected_file_path #i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
+    global selected_file_path, rows, columns #i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
     if selected_file_path:  # Check if a file path is selected
         # Create a themed Tkinter window for displaying ASCII art
         ascii_window = tk.Tk() #creates the window
@@ -73,7 +78,7 @@ def open_file(font_size_var):
         ascii_window.configure(bg="#f0f0f0") #white cos we in testing
         
         # Get ASCII art from the selected image
-        ascii_art = get_ascii_art(selected_file_path)
+        ascii_art = get_ascii_art(selected_file_path, rows.get(), columns.get())
         
         # Create a label for displaying the ASCII art
         ascii_label = tk.Label(
@@ -95,10 +100,10 @@ main_window.title("Settings for your generation!")
 main_window.geometry("400x400")
 main_window.configure(bg="#f0f0f0")
 
-# Create a button for selecting an image file
+# creates a generate art button
 get_art_button = tk.Button(
     main_window,
-    text="Generate image",
+    text="Generate artwork",
     font=("Rockabilly", 10),
     command=lambda: open_file(font_size_var.get()),
     width=20,  
@@ -111,7 +116,7 @@ get_art_button.pack(pady=10)
 # gets the image path
 get_image_path_button = tk.Button(
     main_window,
-    text="Select file path for your image",
+    text="Select image",
     font=("Rockabilly", 10),
     command=get_image_path,
     width=20,  
@@ -120,10 +125,16 @@ get_image_path_button = tk.Button(
 
 get_image_path_button.pack(pady=10)
 
+####GUI variables
+font_size_var = tk.IntVar() ###declares a bunch of int variables and sets a pre value of 1 for all
+font_size_var.set(1)
+rows = tk.IntVar()## if y % 1 == 0:
+rows.set(1)
+columns = tk.IntVar() ## if x % columns == 0:
+columns.set(1)
 
-#font size slider 
-font_size_var = tk.IntVar()
-font_size_var.set(2)
+## scale for font size  should maybe make classes for all these? lots of repetition
+
 font_size_scale = tk.Scale(
     main_window,
     from_=1,
@@ -135,12 +146,31 @@ font_size_scale = tk.Scale(
 
 font_size_scale.pack(pady=10)
 
+rows_scale = tk.Scale(
+    main_window,
+    from_= 1,
+    to= 10,
+    orient= tk.HORIZONTAL,
+    variable= rows,
+    label="adjust Y Scaling"
+    )
+
+rows_scale.pack(pady=10)
+
+
+columns_scale = tk.Scale(
+    main_window,
+    from_= 1,
+    to= 10,
+    orient= tk.HORIZONTAL,
+    variable= columns,
+    label="adjust X Scaling"
+    )
+
+columns_scale.pack(pady=10)
 
 #starts the main loop of the main GUI window
 main_window.mainloop()
-
-
-
 
 
 
