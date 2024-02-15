@@ -3,7 +3,8 @@ import tkinter as tk
 from tkinter import filedialog
 import cv2
 import os
-##### mp4 doesnt work dont use it
+import time
+
 selected_file_path = ""  # Global variable to store the selected file path
 selected_output_path = ""
 
@@ -62,44 +63,68 @@ def get_ascii_art(image_path, rows, columns):
 
 
 def get_video_path():
-    global selected_file_path#i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
-    selected_file_path = filedialog.askopenfilename(filetypes=[("Mp4 Files", "*.mp4;")]) 
-
-def get_output_folder():
-    global selected_output_path
-    selected_output_path = filedialog.askdirectory()
+    global selected_file_path, selected_output_path#i know globals are bad but i am sick of trying to work out how to call it in the function without filepath name error
+    selected_file_path = filedialog.askopenfilename(filetypes=[("Mp4 Files", "*.mp4;")]) #selects a mp4
+    selected_output_path = filedialog.askdirectory() # selects a output jpeg dump folder
 
 def mp4_to_jpeg():
-    global selected_file_path, selected_output_path
+    global selected_file_path, selected_output_path # blah blah globals
 
-    cap = cv2.VideoCapture(selected_file_path)
+    cap = cv2.VideoCapture(selected_file_path) #creates a cv2 object video capture cap is used to read frames
 
-    frame_count = 0
+    frame_count = 0 # counter
 
     while True:
-        ret, frame = cap.read()
+        try: 
+            ret, frame = cap.read() #if ret is true then frame was successful if its false we have an error or end of video
 
-        if not ret:
-            break
+            if not ret: # ends loop on error or end of video
+                print("End of video or error has occured")
+                break
 
-        jpeg_filename = f"{selected_output_path}/frame_{frame_count:044}.jpg"
-        cv2.imwrite(jpeg_filename, frame)
+            jpeg_filename = f"{selected_output_path}/frame_{frame_count:044}.jpg"
+            cv2.imwrite(jpeg_filename, frame)  #sets a new jpeg file in the dump folder for the frame
 
-        frame_count += 1
+            frame_count += 1 #increases counter
+
+            # Check if the frame count is a multiple of 20
+        except Exception as e: #error
+            print("Error: ", e)
     
-    cap.release()
+    cap.release() #releases memory 
 
-def jpeg_to_string(folder_path):
-    frame_dict = {}
+    jpeg_to_string(selected_output_path, rows, columns) #time to convert the jpegs into art
+
+def jpeg_to_string(folder_path, rows, columns):
+    frame_dict = {} 
+
+    ascii_window = tk.Tk()  
+    ascii_window.title("ASCII Art")  
+
+    ascii_window.geometry("500x300")
+    ascii_window.configure(bg="#f0f0f0")  
+
     with os.scandir(folder_path) as entries:
-      for entry in entries:
-        if entry.is_file():
-            ascii_art = get_ascii_art(image_path = entry)
-            frame_dict[entry.name] = ascii_art
+        for entry in entries:
+            if entry.is_file():
+                image_path = entry.path
+                ascii_art = get_ascii_art(image_path, rows.get(), columns.get())
+                frame_dict[entry.name] = ascii_art
 
-def output_frame_dict():
-    return 0
+    frame = tk.Frame(ascii_window, bg="#f0f0f0")
+    frame.pack()
 
+
+    ascii_string = tk.StringVar()
+    ascii_label = tk.Label(
+        frame,
+        textvariable = ascii_string,
+        font=("Courier New", font_size_var.get()),  
+        bg="#f0f0f0",
+        justify="left"
+        )
+    
+    ascii_label.pack(pady=5, padx=5)  
 
 # Function to set the file path
 def get_image_path():
@@ -153,6 +178,17 @@ get_art_button = tk.Button(
 
 
 get_art_button.pack(pady= 10)
+
+get_video_button = tk.Button(
+    main_window,
+    text= "generate ASCII video",
+    font= ("Rockabilly", 10),
+    command= mp4_to_jpeg,  # Call the mp4_to_jpeg function when the button is clicked
+    width= 20,
+    height= 2,
+)
+
+get_video_button.pack(pady= 20)
 
 # gets the image path
 get_image_path_button = tk.Button(
@@ -222,7 +258,4 @@ columns_scale.pack(pady=10)
 
 #starts the main loop of the main GUI window
 main_window.mainloop()
-
-
-
 
