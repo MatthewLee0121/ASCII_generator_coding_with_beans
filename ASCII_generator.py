@@ -153,9 +153,9 @@ if __name__ == '__main__':
         max_brightness = 0 #min brightness on jpeg is 0
         #had to make 2 forloops for dynamic brightness values 
         for y in range(height):
-            if y % 1 == 0:  #can be modified to exclude data not recommended unless you need to try reduce the minimum and maximum values some fucking with the dynamic brightness index will be a more optimised version
+            if y % 1 == 0:  #can be modified to exclude data not recommended unless you need to try reduce the minimum and maximum values some with the dynamic brightness index will be a more optimised version
                 for x in range(width):
-                    if x % 1 == 0: #can be modified to exclude data not recommended unless you need to try reduce the minimum and maximum values some fucking with the dynamic brightness index will be a more optimised version
+                    if x % 1 == 0: #can be modified to exclude data not recommended unless you need to try reduce the minimum and maximum values some with the dynamic brightness index will be a more optimised version
                         brightness = pixels[x, y]
                         min_brightness = min(brightness, min_brightness)#This for loop will get me minimum and max brightness values from the range of data within the pixels
                         max_brightness = max(brightness, max_brightness)# can then utalise this information in the next for loop to dynamically set ASCII characters
